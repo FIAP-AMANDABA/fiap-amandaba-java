@@ -30,17 +30,7 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
-        User user = new User();
-
-        user.setEmail(request.email());
-        user.setPassword(
-                passwordEncoder.encode(request.password())
-        );
-        user.setCpf(request.cpf());
-        user.setDataNascimento(request.dataNascimento());
-        user.setNomeCompleto(request.nomeCompleto());
-        user.setTelefone(request.telefone());
-
+        User user = new User(request, passwordEncoder);
         userRepository.save(user);
     }
 

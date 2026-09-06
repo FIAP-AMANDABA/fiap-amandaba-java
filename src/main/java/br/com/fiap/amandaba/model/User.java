@@ -1,6 +1,8 @@
 package br.com.fiap.amandaba.model;
 
+import br.com.fiap.amandaba.dto.RegisterRequest;
 import jakarta.persistence.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Date;
 
@@ -29,6 +31,28 @@ public class User {
 
     @Column(nullable = true)
     private String telefone;
+
+    public User(Long id, String email, String password, Date dataNascimento, String nomeCompleto, String cpf, String telefone) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.dataNascimento = dataNascimento;
+        this.nomeCompleto = nomeCompleto;
+        this.cpf = cpf;
+        this.telefone = telefone;
+    }
+
+    public User(RegisterRequest request, PasswordEncoder passwordEncoder) {
+        this.email = request.email();
+        this.password = passwordEncoder.encode(request.password());
+        this.dataNascimento = request.dataNascimento();
+        this.nomeCompleto = request.nomeCompleto();
+        this.cpf = request.cpf();
+        this.telefone = request.telefone();
+    }
+
+    public User() {
+    }
 
     public String getEmail() {
         return email;
