@@ -5,5 +5,6 @@ CREATE TABLE users (
     dataNascimento DATE NOT NULL,
     nomeCompleto varchar2(140) NOT NULL,
     cpf varchar2(20) NOT NULL,
-    telefone varchar2(20)
+    telefone varchar2(20),
+    CONSTRAINT uk_users_email UNIQUE (email)
 );
