@@ -11,13 +11,16 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public void register(RegisterRequest request) {
@@ -36,16 +39,20 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public boolean login(LoginRequest request) {
+    public String login(LoginRequest request) {
 
         br.com.fiap.model.User user = userRepository
                 .findByEmail(request.email())
                 .orElseThrow(() ->
                         new RuntimeException("Invalid credentials"));
 
-        return passwordEncoder.matches(
+        if (!passwordEncoder.matches(
                 request.password(),
-                user.getPassword()
-        );
+                user.getPassword())) {
+
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return jwtService.generateToken(user.getEmail());
     }
 }
