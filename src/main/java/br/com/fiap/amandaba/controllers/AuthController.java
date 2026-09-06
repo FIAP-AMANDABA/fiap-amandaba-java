@@ -25,6 +25,7 @@ public class AuthController {
     public ResponseEntity<?> register(
             @RequestBody RegisterRequest request) {
 
+        System.out.println("REGISTER ENDPOINT HIT");
         authService.register(request);
 
         return ResponseEntity.ok("User registered");

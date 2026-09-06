@@ -1,11 +1,11 @@
-package br.com.fiap.model;
+package br.com.fiap.amandaba.model;
 
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "users")
+@Table(name = "aman_users")
 public class User {
 
     @Id

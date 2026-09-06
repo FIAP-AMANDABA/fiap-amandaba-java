@@ -2,6 +2,7 @@ package br.com.fiap.amandaba.service;
 
 import br.com.fiap.amandaba.dto.LoginRequest;
 import br.com.fiap.amandaba.dto.RegisterRequest;
+import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
-        br.com.fiap.model.User user = new br.com.fiap.model.User();
+        User user = new User();
 
         user.setEmail(request.email());
         user.setPassword(
@@ -41,7 +42,7 @@ public class AuthService {
 
     public String login(LoginRequest request) {
 
-        br.com.fiap.model.User user = userRepository
+        User user = userRepository
                 .findByEmail(request.email())
                 .orElseThrow(() ->
                         new RuntimeException("Invalid credentials"));
