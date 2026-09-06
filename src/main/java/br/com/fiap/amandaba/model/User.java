@@ -7,30 +7,37 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Date;
 
 @Entity
-@Table(name = "aman_users")
+@Table(name = "TAB_USUARIO")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_USUARIO")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "DS_EMAIL_USUARIO")
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "DS_SENHA_HASH_USUARIO")
     private String password;
 
-    @Column(name = "DATA_NASCIMENTO", nullable = false)
+    @Column(name = "DT_NASCIMENTO_USUARIO", nullable = false)
     private Date dataNascimento;
 
-    @Column(name = "NOME_COMPLETO", nullable = false)
+    @Column(name = "NM_USUARIO", nullable = false)
     private String nomeCompleto;
 
-    @Column(nullable = false)
+    @Column(name = "NR_CPF_USUARIO", nullable = false)
     private String cpf;
 
-    @Column(nullable = true)
+    @Column(name = "NR_TELEFONE_USUARIO", nullable = true)
     private String telefone;
+
+    @Column(name = "DT_CADASTRO_USUARIO", nullable = false)
+    private Date dataCadastro;
+
+    @Column(name = "ST_USUARIO", nullable = false)
+    private String statusUsuario;
 
     public User(Long id, String email, String password, Date dataNascimento, String nomeCompleto, String cpf, String telefone) {
         this.id = id;
@@ -49,6 +56,8 @@ public class User {
         this.nomeCompleto = request.nomeCompleto();
         this.cpf = request.cpf();
         this.telefone = request.telefone();
+        this.dataCadastro = new Date();
+        this.statusUsuario = "ATIVO";
     }
 
     public User() {
