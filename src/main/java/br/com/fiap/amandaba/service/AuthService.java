@@ -36,6 +36,10 @@ public class AuthService {
         user.setPassword(
                 passwordEncoder.encode(request.password())
         );
+        user.setCpf(request.cpf());
+        user.setDataNascimento(request.dataNascimento());
+        user.setNomeCompleto(request.nomeCompleto());
+        user.setTelefone(request.telefone());
 
         userRepository.save(user);
     }
