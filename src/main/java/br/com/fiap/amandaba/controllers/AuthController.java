@@ -1,5 +1,6 @@
 package br.com.fiap.amandaba.controllers;
 
+import br.com.fiap.amandaba.dto.AuthResponse;
 import br.com.fiap.amandaba.dto.LoginRequest;
 import br.com.fiap.amandaba.dto.RegisterRequest;
 import br.com.fiap.amandaba.service.AuthService;
@@ -30,17 +31,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
+    public ResponseEntity<AuthResponse> login(
             @RequestBody LoginRequest request) {
 
-        boolean authenticated = authService.login(request);
+        String token = authService.login(request);
 
-        if (!authenticated) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid credentials");
-        }
-
-        return ResponseEntity.ok("Login successful");
+        return ResponseEntity.ok(
+                new AuthResponse(token)
+        );
     }
 }
