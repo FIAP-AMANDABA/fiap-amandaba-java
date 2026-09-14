@@ -29,7 +29,7 @@ public class AuthService {
         this.tutorRepository = tutorRepository;
     }
 
-    public void register(RegisterRequest request) {
+    public User register(RegisterRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new RuntimeException("Email already registered");
@@ -45,6 +45,8 @@ public class AuthService {
         Tutor tutor = new Tutor(userRegistered.getId());
 
         tutorRepository.save(tutor);
+
+        return user;
     }
 
     public String login(LoginRequest request) {

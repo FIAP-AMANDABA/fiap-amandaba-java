@@ -3,6 +3,7 @@ package br.com.fiap.amandaba.controllers;
 import br.com.fiap.amandaba.dto.AuthResponse;
 import br.com.fiap.amandaba.dto.LoginRequest;
 import br.com.fiap.amandaba.dto.RegisterRequest;
+import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +27,9 @@ public class AuthController {
             @RequestBody RegisterRequest request) {
 
         System.out.println("REGISTER ENDPOINT HIT");
-        authService.register(request);
+        User user = authService.register(request);
 
-        return ResponseEntity.ok("User registered");
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/login")
