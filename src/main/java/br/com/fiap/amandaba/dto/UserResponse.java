@@ -10,6 +10,7 @@ public record UserResponse(
         String cpf,
         String telefone,
         Date dataCadastro,
-        String statusUsuario
+        String statusUsuario,
+        Long idTutor
 ) {
 }

@@ -26,6 +26,7 @@ public class AuthController {
 
         System.out.println("REGISTER ENDPOINT HIT");
         User user = authService.register(request);
+        Tutor tutorCriado = authService.getTutor(user.getId());
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
@@ -34,7 +35,8 @@ public class AuthController {
                 user.getCpf(),
                 user.getTelefone(),
                 user.getDataNascimento(),
-                user.getStatusUsuario()
+                user.getStatusUsuario(),
+                tutorCriado.getIdTutor()
         );
         return ResponseEntity.ok(userResponse);
     }
@@ -45,6 +47,7 @@ public class AuthController {
 
         String token = authService.login(request);
         User user = authService.getUser(request.email());
+        Tutor tutor = authService.getTutor(user.getId());
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
@@ -53,7 +56,8 @@ public class AuthController {
                 user.getCpf(),
                 user.getTelefone(),
                 user.getDataNascimento(),
-                user.getStatusUsuario()
+                user.getStatusUsuario(),
+                tutor.getIdTutor()
         );
         return ResponseEntity.ok(userResponse
         );
