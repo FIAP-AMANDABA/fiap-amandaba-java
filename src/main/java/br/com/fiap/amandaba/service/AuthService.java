@@ -6,6 +6,7 @@ import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.repository.TutorRepository;
 import br.com.fiap.amandaba.repository.UserRepository;
+import org.hibernate.QueryException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,5 +65,10 @@ public class AuthService {
         }
 
         return jwtService.generateToken(user.getEmail());
+    }
+
+    public Tutor getTutor(Long userId){
+        Tutor tutor = tutorRepository.findByUserId(userId).orElseThrow(()-> new QueryException("Erro na busca por tutor"));
+        return tutor;
     }
 }
