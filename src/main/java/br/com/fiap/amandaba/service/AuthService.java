@@ -30,6 +30,11 @@ public class AuthService {
         this.tutorRepository = tutorRepository;
     }
 
+    public User getUser(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("User não foi encontrado"));
+        return user;
+    }
+
     public User register(RegisterRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {

@@ -39,6 +39,22 @@ public class User {
     @Column(name = "ST_USUARIO", nullable = false)
     private String statusUsuario;
 
+    public String getStatusUsuario() {
+        return statusUsuario;
+    }
+
+    public void setStatusUsuario(String statusUsuario) {
+        this.statusUsuario = statusUsuario;
+    }
+
+    public Date getDataCadastro() {
+        return dataCadastro;
+    }
+
+    public void setDataCadastro(Date dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
+
     public User(Long id, String email, String password, Date dataNascimento, String nomeCompleto, String cpf, String telefone) {
         this.id = id;
         this.email = email;

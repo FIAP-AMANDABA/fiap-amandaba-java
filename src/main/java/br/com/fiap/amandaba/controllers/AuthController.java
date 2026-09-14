@@ -1,9 +1,6 @@
 package br.com.fiap.amandaba.controllers;
 
-import br.com.fiap.amandaba.dto.AuthResponse;
-import br.com.fiap.amandaba.dto.LoginRequest;
-import br.com.fiap.amandaba.dto.RegisterRequest;
-import br.com.fiap.amandaba.dto.TutorResponse;
+import br.com.fiap.amandaba.dto.*;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.repository.TutorRepository;
@@ -24,23 +21,41 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(
+    public ResponseEntity<UserResponse> register(
             @RequestBody RegisterRequest request) {
 
         System.out.println("REGISTER ENDPOINT HIT");
         User user = authService.register(request);
-
-        return ResponseEntity.ok(user);
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getDataNascimento(),
+                user.getNomeCompleto(),
+                user.getCpf(),
+                user.getTelefone(),
+                user.getDataNascimento(),
+                user.getStatusUsuario()
+        );
+        return ResponseEntity.ok(userResponse);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(
+    public ResponseEntity<UserResponse> login(
             @RequestBody LoginRequest request) {
 
         String token = authService.login(request);
-
-        return ResponseEntity.ok(
-                new AuthResponse(token)
+        User user = authService.getUser(request.email());
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getDataNascimento(),
+                user.getNomeCompleto(),
+                user.getCpf(),
+                user.getTelefone(),
+                user.getDataNascimento(),
+                user.getStatusUsuario()
+        );
+        return ResponseEntity.ok(userResponse
         );
     }
 }
