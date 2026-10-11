@@ -80,22 +80,12 @@ public class AuthController {
         return ResponseEntity.ok(userResponse);
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(
-            @RequestBody LoginRequest request) throws AccountNotFoundException {
+            @RequestBody LoginRequest request) {
+        UserResponse userResponse = authService.login(request);
+        return userResponse == null?
+                ResponseEntity.ok(userResponse) : ResponseEntity.notFound().build();
 
-        User user = authService.getUser(request.email());
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        Tutor tutor = tutorService.getTutor(user.getId());
-        Veterinario veterinario = veterinarioService.getVeterinarioByUserId(user.getId());
-        if(tutor == null){
-            VetResponse vetResponse = new VetResponse(veterinario, user);
-            return ResponseEntity.ok(vetResponse);
-        }
-        TutorResponse tutorResponse = new TutorResponse(tutor, user);
-        return ResponseEntity.ok(tutorResponse);
     }
 }
