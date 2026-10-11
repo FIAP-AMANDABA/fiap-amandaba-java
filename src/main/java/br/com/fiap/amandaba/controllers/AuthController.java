@@ -22,13 +22,9 @@ import javax.security.auth.login.AccountNotFoundException;
 public class AuthController {
 
     private final AuthService authService;
-    private final VeterinarioService veterinarioService;
-    private final TutorService tutorService;
 
-    public AuthController(AuthService authService, VeterinarioService veterinarioService, TutorService tutorService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.veterinarioService = veterinarioService;
-        this.tutorService = tutorService;
     }
 
     @PostMapping("/register/vet")
