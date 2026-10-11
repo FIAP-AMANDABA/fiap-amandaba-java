@@ -30,4 +30,9 @@ public class VeterinarioService {
         return veterinario;
     }
 
+    public Veterinario getVeterinarioByUserId(Long userId){
+        Veterinario veterinario = veterinarioRepository.findByUserId(userId);
+        return veterinario;
+    }
+
 }

@@ -15,6 +15,8 @@ import br.com.fiap.amandaba.service.VeterinarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -81,12 +83,19 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(
-            @RequestBody LoginRequest request) {
+            @RequestBody LoginRequest request) throws AccountNotFoundException {
 
         User user = authService.getUser(request.email());
-        Tutor tutor = authService.getTutor(user.getId());
-
-
-        return ResponseEntity.ok();
+        if (user == null){
+            return ResponseEntity.notFound().build();
+        }
+        Tutor tutor = tutorService.getTutor(user.getId());
+        Veterinario veterinario = veterinarioService.getVeterinarioByUserId(user.getId());
+        if(tutor == null){
+            VetResponse vetResponse = new VetResponse(veterinario, user);
+            return ResponseEntity.ok(vetResponse);
+        }
+        TutorResponse tutorResponse = new TutorResponse(tutor, user);
+        return ResponseEntity.ok(tutorResponse);
     }
 }

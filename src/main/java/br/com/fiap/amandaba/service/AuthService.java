@@ -71,9 +71,4 @@ public class AuthService {
 
         return jwtService.generateToken(user.getEmail());
     }
-
-    public Tutor getTutor(Long userId){
-        Tutor tutor = tutorRepository.findByUserId(userId).orElseThrow(()-> new QueryException("Erro na busca por tutor"));
-        return tutor;
-    }
 }
