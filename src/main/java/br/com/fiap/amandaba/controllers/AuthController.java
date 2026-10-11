@@ -3,8 +3,12 @@ package br.com.fiap.amandaba.controllers;
 import br.com.fiap.amandaba.dto.*;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
+import br.com.fiap.amandaba.model.Veterinario;
 import br.com.fiap.amandaba.repository.TutorRepository;
+import br.com.fiap.amandaba.repository.VeterinarioRepository;
 import br.com.fiap.amandaba.service.AuthService;
+import br.com.fiap.amandaba.service.TutorService;
+import br.com.fiap.amandaba.service.VeterinarioService;
 import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,31 +19,64 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final VeterinarioService veterinarioService;
+    private final TutorService tutorService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, VeterinarioService veterinarioService, TutorService tutorService) {
         this.authService = authService;
+        this.veterinarioService = veterinarioService;
+        this.tutorService = tutorService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(
-            @RequestBody RegisterRequest request) {
+    @PostMapping("/register/vet")
+    public ResponseEntity<VetResponse> registerVeterinario(
+            @RequestBody RegisterRequestVeterinario request) {
 
-        System.out.println("REGISTER ENDPOINT HIT");
         User user = authService.register(request);
-        Tutor tutorCriado = authService.getTutor(user.getId());
-        UserResponse userResponse = new UserResponse(
+        Veterinario veterinarioCriado = veterinarioService.veterinarioRegister(request, user.getId());
+
+        VetResponse userResponse = new VetResponse(
+                veterinarioCriado.getId(),
+                veterinarioCriado.getCrmv(),
+                veterinarioCriado.getVeterinarioStatus(),
+
                 user.getId(),
                 user.getEmail(),
-                user.getDataNascimento(),
                 user.getNomeCompleto(),
                 user.getCpf(),
-                user.getTelefone(),
-                user.getDataNascimento(),
+                user.getDataCadastro(),
                 user.getStatusUsuario(),
-                tutorCriado.getIdTutor()
+
+                user.getDataNascimento(),
+                user.getTelefone()
+                );
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/register/tutor")
+    public ResponseEntity<TutorResponse> registerTutor(
+            @RequestBody RegisterRequestTutor request) {
+
+        User user = authService.register(request);
+        Tutor tutorCriado = tutorService.tutorRegister(request, user.getId());
+
+        TutorResponse userResponse = new TutorResponse(
+
+                tutorCriado.getIdTutor(),
+
+                user.getId(),
+                user.getEmail(),
+                user.getNomeCompleto(),
+                user.getCpf(),
+                user.getDataCadastro(),
+                user.getStatusUsuario(),
+
+                user.getDataNascimento(),
+                user.getTelefone()
         );
         return ResponseEntity.ok(userResponse);
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(

@@ -1,7 +1,7 @@
 package br.com.fiap.amandaba.service;
 
 import br.com.fiap.amandaba.dto.LoginRequest;
-import br.com.fiap.amandaba.dto.RegisterRequest;
+import br.com.fiap.amandaba.dto.UserRequest;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.repository.TutorRepository;
@@ -35,9 +35,9 @@ public class AuthService {
         return user;
     }
 
-    public User register(RegisterRequest request) {
+    public User register(UserRequest request) {
 
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered");
         }
 

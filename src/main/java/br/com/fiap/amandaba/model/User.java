@@ -1,6 +1,9 @@
 package br.com.fiap.amandaba.model;
 
-import br.com.fiap.amandaba.dto.RegisterRequest;
+import br.com.fiap.amandaba.dto.RegisterRequestTutor;
+import br.com.fiap.amandaba.dto.RegisterRequestVeterinario;
+import br.com.fiap.amandaba.dto.UserRequest;
+import br.com.fiap.amandaba.enums.UserStatus;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -37,13 +40,13 @@ public class User {
     private Date dataCadastro;
 
     @Column(name = "ST_USUARIO", nullable = false)
-    private String statusUsuario;
+    private UserStatus statusUsuario;
 
-    public String getStatusUsuario() {
+    public UserStatus getStatusUsuario() {
         return statusUsuario;
     }
 
-    public void setStatusUsuario(String statusUsuario) {
+    public void setStatusUsuario(UserStatus statusUsuario) {
         this.statusUsuario = statusUsuario;
     }
 
@@ -65,16 +68,17 @@ public class User {
         this.telefone = telefone;
     }
 
-    public User(RegisterRequest request, PasswordEncoder passwordEncoder) {
-        this.email = request.email();
-        this.password = passwordEncoder.encode(request.password());
-        this.dataNascimento = request.dataNascimento();
-        this.nomeCompleto = request.nomeCompleto();
-        this.cpf = request.cpf();
-        this.telefone = request.telefone();
+    public User(UserRequest request, PasswordEncoder passwordEncoder) {
+        this.email = request.getEmail();
+        this.password = passwordEncoder.encode(request.getPassword());
+        this.dataNascimento = request.getDataNascimento();
+        this.nomeCompleto = request.getNomeCompleto();
+        this.cpf = request.getCpf();
+        this.telefone = request.getTelefone();
         this.dataCadastro = new Date();
-        this.statusUsuario = "ATIVO";
+        this.statusUsuario = UserStatus.ATIVO;
     }
+
 
     public User() {
     }

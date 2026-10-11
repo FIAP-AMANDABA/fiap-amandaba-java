@@ -1,16 +1,22 @@
 package br.com.fiap.amandaba.dto;
 
+import br.com.fiap.amandaba.enums.UserStatus;
+import br.com.fiap.amandaba.enums.VeterinarioStatus;
+
 import java.util.Date;
 
 public record TutorResponse(
-        Long tutorId,
-        Long userId,
+
+        Long idTutor,
+
+        Long idUser,
         String email,
-        String password,
-        Date dataNascimento,
         String nomeCompleto,
         String cpf,
-        String telefone,
         Date dataCadastro,
-        String statusUsuario
-) { }
+        UserStatus statusUsuario,
+
+        Date dataNascimento,
+        String telefone
+) {
+}
