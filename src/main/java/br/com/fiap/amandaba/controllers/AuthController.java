@@ -4,6 +4,7 @@ import br.com.fiap.amandaba.dto.request.LoginRequest;
 import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
 import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
 import br.com.fiap.amandaba.dto.response.TutorResponse;
+import br.com.fiap.amandaba.dto.response.UserResponse;
 import br.com.fiap.amandaba.dto.response.VetResponse;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
@@ -82,21 +83,10 @@ public class AuthController {
     public ResponseEntity<UserResponse> login(
             @RequestBody LoginRequest request) {
 
-        String token = authService.login(request);
         User user = authService.getUser(request.email());
         Tutor tutor = authService.getTutor(user.getId());
-        UserResponse userResponse = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getDataNascimento(),
-                user.getNomeCompleto(),
-                user.getCpf(),
-                user.getTelefone(),
-                user.getDataNascimento(),
-                user.getStatusUsuario(),
-                tutor.getIdTutor()
-        );
-        return ResponseEntity.ok(userResponse
-        );
+
+
+        return ResponseEntity.ok();
     }
 }
