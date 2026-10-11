@@ -1,6 +1,6 @@
 package br.com.fiap.amandaba.model;
 
-import br.com.fiap.amandaba.dto.RegisterRequestTutor;
+import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
 import jakarta.persistence.*;
 
 @Entity

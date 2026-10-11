@@ -1,8 +1,6 @@
 package br.com.fiap.amandaba.model;
 
-import br.com.fiap.amandaba.dto.RegisterRequestTutor;
-import br.com.fiap.amandaba.dto.RegisterRequestVeterinario;
-import br.com.fiap.amandaba.dto.UserRequest;
+import br.com.fiap.amandaba.dto.request.UserRequest;
 import br.com.fiap.amandaba.enums.UserStatus;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;

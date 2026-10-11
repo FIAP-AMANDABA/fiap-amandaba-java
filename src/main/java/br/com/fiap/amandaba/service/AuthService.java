@@ -1,7 +1,7 @@
 package br.com.fiap.amandaba.service;
 
-import br.com.fiap.amandaba.dto.LoginRequest;
-import br.com.fiap.amandaba.dto.UserRequest;
+import br.com.fiap.amandaba.dto.request.LoginRequest;
+import br.com.fiap.amandaba.dto.request.UserRequest;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.repository.TutorRepository;

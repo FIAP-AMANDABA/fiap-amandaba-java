@@ -1,6 +1,6 @@
 package br.com.fiap.amandaba.model;
 
-import br.com.fiap.amandaba.dto.RegisterRequestVeterinario;
+import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
 import br.com.fiap.amandaba.enums.VeterinarioStatus;
 import jakarta.persistence.*;
 

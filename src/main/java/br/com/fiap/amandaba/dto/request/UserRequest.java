@@ -1,4 +1,4 @@
-package br.com.fiap.amandaba.dto;
+package br.com.fiap.amandaba.dto.request;
 
 import java.util.Date;
 

@@ -1,6 +1,6 @@
 package br.com.fiap.amandaba.service;
 
-import br.com.fiap.amandaba.dto.RegisterRequestVeterinario;
+import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
 import br.com.fiap.amandaba.model.Veterinario;
 import br.com.fiap.amandaba.repository.VeterinarioRepository;
 import org.springframework.dao.DuplicateKeyException;

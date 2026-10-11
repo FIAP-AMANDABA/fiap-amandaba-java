@@ -1,16 +1,16 @@
 package br.com.fiap.amandaba.controllers;
 
-import br.com.fiap.amandaba.dto.*;
+import br.com.fiap.amandaba.dto.request.LoginRequest;
+import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
+import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
+import br.com.fiap.amandaba.dto.response.TutorResponse;
+import br.com.fiap.amandaba.dto.response.VetResponse;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.model.User;
 import br.com.fiap.amandaba.model.Veterinario;
-import br.com.fiap.amandaba.repository.TutorRepository;
-import br.com.fiap.amandaba.repository.VeterinarioRepository;
 import br.com.fiap.amandaba.service.AuthService;
 import br.com.fiap.amandaba.service.TutorService;
 import br.com.fiap.amandaba.service.VeterinarioService;
-import org.hibernate.annotations.Parameter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

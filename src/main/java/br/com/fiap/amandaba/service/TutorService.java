@@ -1,6 +1,6 @@
 package br.com.fiap.amandaba.service;
 
-import br.com.fiap.amandaba.dto.RegisterRequestTutor;
+import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
 import br.com.fiap.amandaba.model.Tutor;
 import br.com.fiap.amandaba.repository.TutorRepository;
 import org.springframework.stereotype.Service;

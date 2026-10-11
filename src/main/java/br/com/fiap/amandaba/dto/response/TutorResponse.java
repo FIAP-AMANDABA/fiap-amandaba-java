@@ -1,15 +1,12 @@
-package br.com.fiap.amandaba.dto;
+package br.com.fiap.amandaba.dto.response;
 
 import br.com.fiap.amandaba.enums.UserStatus;
-import br.com.fiap.amandaba.enums.VeterinarioStatus;
 
 import java.util.Date;
 
-public record VetResponse(
+public record TutorResponse(
 
-        Long idVeterinario,
-        String crmv,
-        VeterinarioStatus veterinarioStatus,
+        Long idTutor,
 
         Long idUser,
         String email,

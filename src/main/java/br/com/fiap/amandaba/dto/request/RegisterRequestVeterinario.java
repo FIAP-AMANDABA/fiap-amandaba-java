@@ -1,8 +1,8 @@
-package br.com.fiap.amandaba.dto;
+package br.com.fiap.amandaba.dto.request;
 
 import java.util.Date;
 
-public class RegisterRequestVeterinario extends UserRequest{
+public class RegisterRequestVeterinario extends UserRequest {
     String crmv_veterinario;
 
     public RegisterRequestVeterinario(String nomeCompleto, String cpf, String email, String password, String telefone, Date dataNascimento) {
