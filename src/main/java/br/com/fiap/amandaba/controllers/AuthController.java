@@ -34,50 +34,16 @@ public class AuthController {
     @PostMapping("/register/vet")
     public ResponseEntity<VetResponse> registerVeterinario(
             @RequestBody RegisterRequestVeterinario request) {
-
-        User user = authService.register(request);
-        Veterinario veterinarioCriado = veterinarioService.veterinarioRegister(request, user.getId());
-
-        VetResponse userResponse = new VetResponse(
-                veterinarioCriado.getId(),
-                veterinarioCriado.getCrmv(),
-                veterinarioCriado.getVeterinarioStatus(),
-
-                user.getId(),
-                user.getEmail(),
-                user.getNomeCompleto(),
-                user.getCpf(),
-                user.getDataCadastro(),
-                user.getStatusUsuario(),
-
-                user.getDataNascimento(),
-                user.getTelefone()
-                );
-        return ResponseEntity.ok(userResponse);
+        VetResponse vetResponse = authService.registerVeterinario(request);
+        return ResponseEntity.ok(vetResponse);
     }
 
     @PostMapping("/register/tutor")
     public ResponseEntity<TutorResponse> registerTutor(
             @RequestBody RegisterRequestTutor request) {
+        TutorResponse tutorResponse = authService.registerTutor(request);
+        return ResponseEntity.ok(tutorResponse);
 
-        User user = authService.register(request);
-        Tutor tutorCriado = tutorService.tutorRegister(request, user.getId());
-
-        TutorResponse userResponse = new TutorResponse(
-
-                tutorCriado.getIdTutor(),
-
-                user.getId(),
-                user.getEmail(),
-                user.getNomeCompleto(),
-                user.getCpf(),
-                user.getDataCadastro(),
-                user.getStatusUsuario(),
-
-                user.getDataNascimento(),
-                user.getTelefone()
-        );
-        return ResponseEntity.ok(userResponse);
     }
 
     @PostMapping("/login")

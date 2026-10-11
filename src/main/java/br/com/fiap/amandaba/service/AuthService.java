@@ -1,6 +1,8 @@
 package br.com.fiap.amandaba.service;
 
 import br.com.fiap.amandaba.dto.request.LoginRequest;
+import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
+import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
 import br.com.fiap.amandaba.dto.request.UserRequest;
 import br.com.fiap.amandaba.dto.response.TutorResponse;
 import br.com.fiap.amandaba.dto.response.UserResponse;
@@ -79,6 +81,50 @@ public class AuthService {
         }
         TutorResponse tutorResponse = new TutorResponse(tutor, user);
         return tutorResponse;
+    }
+
+    public VetResponse registerVeterinario(RegisterRequestVeterinario request){
+
+        User user = register(request);
+        Veterinario veterinarioCriado = veterinarioService.veterinarioRegister(request, user.getId());
+
+        VetResponse userResponse = new VetResponse(
+                veterinarioCriado.getId(),
+                veterinarioCriado.getCrmv(),
+                veterinarioCriado.getVeterinarioStatus(),
+
+                user.getId(),
+                user.getEmail(),
+                user.getNomeCompleto(),
+                user.getCpf(),
+                user.getDataCadastro(),
+                user.getStatusUsuario(),
+
+                user.getDataNascimento(),
+                user.getTelefone()
+        );
+        return userResponse;
+    }
+
+    public TutorResponse registerTutor(RegisterRequestTutor request){
+        User user = register(request);
+        Tutor tutorCriado = tutorService.tutorRegister(request, user.getId());
+
+        TutorResponse userResponse = new TutorResponse(
+
+                tutorCriado.getIdTutor(),
+
+                user.getId(),
+                user.getEmail(),
+                user.getNomeCompleto(),
+                user.getCpf(),
+                user.getDataCadastro(),
+                user.getStatusUsuario(),
+
+                user.getDataNascimento(),
+                user.getTelefone()
+        );
+        return userResponse;
     }
 
 }
