@@ -18,4 +18,5 @@ public class TutorResponse extends UserResponse{
         super(user.getId(), user.getEmail(), user.getNomeCompleto(), user.getCpf(), user.getDataCadastro(), user.getStatusUsuario(), user.getDataNascimento(), user.getTelefone());
         this.idTutor = tutor.getIdTutor();
     }
+    public Long getIdTutor() { return idTutor; }
 }

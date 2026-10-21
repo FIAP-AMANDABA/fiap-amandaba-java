@@ -1,139 +1,61 @@
 package br.com.fiap.amandaba.model;
 
-import br.com.fiap.amandaba.dto.request.UserRequest;
 import br.com.fiap.amandaba.enums.UserStatus;
 import jakarta.persistence.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.util.Date;
 
 @Entity
 @Table(name = "TAB_USUARIO")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_USUARIO")
     private Long id;
 
-    @Column(nullable = false, unique = true, name = "DS_EMAIL_USUARIO")
-    private String email;
-
-    @Column(nullable = false, name = "DS_SENHA_HASH_USUARIO")
-    private String password;
-
-    @Column(name = "DT_NASCIMENTO_USUARIO", nullable = false)
-    private Date dataNascimento;
-
-    @Column(name = "NM_USUARIO", nullable = false)
+    @Column(name = "NM_USUARIO", nullable = false, length = 150)
     private String nomeCompleto;
 
-    @Column(name = "NR_CPF_USUARIO", nullable = false)
+    @Column(name = "NR_CPF_USUARIO", nullable = false, unique = true, length = 11)
     private String cpf;
 
-    @Column(name = "NR_TELEFONE_USUARIO", nullable = true)
+    @Temporal(TemporalType.DATE)
+    @Column(name = "DT_NASCIMENTO_USUARIO")
+    private Date dataNascimento;
+
+    @Column(name = "DS_EMAIL_USUARIO", nullable = false, unique = true, length = 150)
+    private String email;
+
+    @Column(name = "NR_TELEFONE_USUARIO", length = 20)
     private String telefone;
 
+    @Column(name = "DS_SENHA_HASH_USUARIO", nullable = false, length = 255)
+    private String password;
+
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DT_CADASTRO_USUARIO", nullable = false)
     private Date dataCadastro;
 
-    @Column(name = "ST_USUARIO", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ST_USUARIO", nullable = false, length = 20)
     private UserStatus statusUsuario;
 
-    public UserStatus getStatusUsuario() {
-        return statusUsuario;
-    }
-
-    public void setStatusUsuario(UserStatus statusUsuario) {
-        this.statusUsuario = statusUsuario;
-    }
-
-    public Date getDataCadastro() {
-        return dataCadastro;
-    }
-
-    public void setDataCadastro(Date dataCadastro) {
-        this.dataCadastro = dataCadastro;
-    }
-
-    public User(Long id, String email, String password, Date dataNascimento, String nomeCompleto, String cpf, String telefone) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.dataNascimento = dataNascimento;
-        this.nomeCompleto = nomeCompleto;
-        this.cpf = cpf;
-        this.telefone = telefone;
-    }
-
-    public User(UserRequest request, PasswordEncoder passwordEncoder) {
-        this.email = request.getEmail();
-        this.password = passwordEncoder.encode(request.getPassword());
-        this.dataNascimento = request.getDataNascimento();
-        this.nomeCompleto = request.getNomeCompleto();
-        this.cpf = request.getCpf();
-        this.telefone = request.getTelefone();
-        this.dataCadastro = new Date();
-        this.statusUsuario = UserStatus.ATIVO;
-    }
-
-
-    public User() {
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getNomeCompleto() {
-        return nomeCompleto;
-    }
-
-    public void setNomeCompleto(String nomeCompleto) {
-        this.nomeCompleto = nomeCompleto;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public Date getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(Date dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public User() {}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNomeCompleto() { return nomeCompleto; }
+    public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
+    public Date getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(Date dataNascimento) { this.dataNascimento = dataNascimento; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public Date getDataCadastro() { return dataCadastro; }
+    public void setDataCadastro(Date dataCadastro) { this.dataCadastro = dataCadastro; }
+    public UserStatus getStatusUsuario() { return statusUsuario; }
+    public void setStatusUsuario(UserStatus statusUsuario) { this.statusUsuario = statusUsuario; }
 }

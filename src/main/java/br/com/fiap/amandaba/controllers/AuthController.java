@@ -1,53 +1,29 @@
 package br.com.fiap.amandaba.controllers;
 
-import br.com.fiap.amandaba.dto.request.LoginRequest;
-import br.com.fiap.amandaba.dto.request.RegisterRequestTutor;
-import br.com.fiap.amandaba.dto.request.RegisterRequestVeterinario;
-import br.com.fiap.amandaba.dto.response.TutorResponse;
-import br.com.fiap.amandaba.dto.response.UserResponse;
-import br.com.fiap.amandaba.dto.response.VetResponse;
-import br.com.fiap.amandaba.model.Tutor;
-import br.com.fiap.amandaba.model.User;
-import br.com.fiap.amandaba.model.Veterinario;
+import br.com.fiap.amandaba.dto.request.*;
+import br.com.fiap.amandaba.dto.response.*;
 import br.com.fiap.amandaba.service.AuthService;
-import br.com.fiap.amandaba.service.TutorService;
-import br.com.fiap.amandaba.service.VeterinarioService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.security.auth.login.AccountNotFoundException;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
-    @PostMapping("/register/vet")
-    public ResponseEntity<VetResponse> registerVeterinario(
-            @RequestBody RegisterRequestVeterinario request) {
-        VetResponse vetResponse = authService.registerVeterinario(request);
-        return ResponseEntity.ok(vetResponse);
-    }
+    private final AuthService auth;
+    public AuthController(AuthService auth) { this.auth=auth; }
 
     @PostMapping("/register/tutor")
-    public ResponseEntity<TutorResponse> registerTutor(
-            @RequestBody RegisterRequestTutor request) {
-        TutorResponse tutorResponse = authService.registerTutor(request);
-        return ResponseEntity.ok(tutorResponse);
-
+    public ResponseEntity<TutorResponse> registerTutor(@Valid @RequestBody RegisterRequestTutor request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(auth.registerTutor(request));
     }
-
+    @PostMapping("/register/vet")
+    public ResponseEntity<VetResponse> registerVet(@Valid @RequestBody RegisterRequestVeterinario request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(auth.registerVeterinario(request));
+    }
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(
-            @RequestBody LoginRequest request) {
-        UserResponse userResponse = authService.login(request);
-        return userResponse == null?
-                ResponseEntity.ok(userResponse) : ResponseEntity.notFound().build();
-
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(auth.login(request));
     }
 }

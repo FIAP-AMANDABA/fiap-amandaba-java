@@ -25,4 +25,7 @@ public class VetResponse extends UserResponse{
         this.crmv = veterinario.getCrmv();
         this.veterinarioStatus = veterinario.getVeterinarioStatus();
     }
+    public Long getIdVeterinario() { return idVeterinario; }
+    public String getCrmv() { return crmv; }
+    public VeterinarioStatus getVeterinarioStatus() { return veterinarioStatus; }
 }
