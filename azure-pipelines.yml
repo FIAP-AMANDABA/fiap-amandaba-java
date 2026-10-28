@@ -12,10 +12,10 @@ variables:
   azureSubscription: 'ec55ef85-2871-4b39-9c82-912e3c1a7e34'
 
   # Web app name
-  webAppName: ''
+  webAppName: 'fiap-amandaba-java'
 
   # Environment name
-  environmentName: ''
+  environmentName: 'producao'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
