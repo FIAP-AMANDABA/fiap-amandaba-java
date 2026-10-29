@@ -40,6 +40,10 @@ stages:
         publishJUnitResults: true
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
         goals: 'clean package'
+      env:
+        DB_URL: $(DB_URL)
+        DB_USER: $(DB_USER)
+        DB_PASSWORD: $(DB_PASSWORD)
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
