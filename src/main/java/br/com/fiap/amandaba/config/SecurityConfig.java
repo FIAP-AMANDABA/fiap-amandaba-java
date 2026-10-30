@@ -20,7 +20,7 @@ public class SecurityConfig {
                 )
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/auth/**", "/api/users/**", "/tutor/**").permitAll()
+                        .requestMatchers("/", "/error", "/api/auth/**", "/api/users/**", "/tutor/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
