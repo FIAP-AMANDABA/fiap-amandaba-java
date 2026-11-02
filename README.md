@@ -162,15 +162,118 @@ O Flyway permanece presente e há uma migration `V1__create_shared_account_table
 
 Testes unitários de cadastro separado, autenticação correta/incorreta, usuários inativos, token emitido, token com assinatura inválida, atualização de senha e desativação. Os testes usam mocks e não precisam de Oracle. Testes end-to-end com Oracle/Swagger exigem instância e credenciais próprias.
 
-## Entrega Sprint 4 — Java Advanced
+## Conceitos de Java Advanced aplicados
 
-- **40 pts:** demonstrar aplicação funcional online, cadastro/login, edição de perfil, perfis distintos, busca de veterinários e relatórios de saúde.
-- **20 pts:** explicar arquitetura, regras de autenticação e decisão de banco compartilhado.
-- **20 pts:** integração com .NET/Oracle comprovada com token real e controle de acesso a pets.
-- **10 pts:** apresentação oral com participação dos integrantes.
-- **10 pts:** README, repositório organizado e vídeo de até 15 minutos.
+Durante o desenvolvimento da API Java do Amandaba, foram aplicados conceitos e recursos do ecossistema Java e Spring Boot, com foco em organização do código, segurança, validação de dados, reutilização e separação de responsabilidades.
 
-**Pendente de ações fora deste pacote:** publicar a aplicação em serviço online (ex.: Azure), integrar e validar com a API .NET rodando, acrescentar os integrantes e links reais no README, gravar vídeo até 15 minutos. Foram adicionados dois fluxos de acompanhamento não-CRUD: resumo clínico do tutor e resumo dos pets compartilhados com o veterinário. Ambos dependem das tabelas de pets e da função `PKG_PET_SAUDE.FN_CALCULAR_IDADE_PET` do script SQL da Sprint 4. A comprovação efetiva depende de executar esses endpoints no Oracle com a package instalada.
+### 1. DTOs (Data Transfer Objects)
+
+Os DTOs são utilizados para transportar informações entre o cliente e a API, evitando que as entidades utilizadas para persistência no banco de dados sejam expostas diretamente nas requisições e respostas.
+
+No projeto, os DTOs foram organizados em dois grupos:
+
+- **DTOs de requisição (`dto/request`):** recebem os dados enviados pelo cliente, como `LoginRequest`, `RegisterRequestTutor`, `RegisterRequestVeterinario`, `AtualizarPerfilRequest` e `AlterarSenhaRequest`.
+- **DTOs de resposta (`dto/response`):** definem quais informações serão devolvidas pela API, como `AuthResponse`, `UserResponse`, `TutorResponse`, `VetResponse` e `RelatorioPetResponse`.
+
+Também foram utilizados Java Records em DTOs que possuem estrutura mais simples, como `LoginRequest` e `AtualizarCrmvRequest`. Essa abordagem reduz a quantidade de código necessária para representar objetos imutáveis de transporte de dados.
+
+Essa separação contribui para a segurança da aplicação, pois permite controlar quais informações podem ser recebidas e quais podem ser disponibilizadas ao cliente, evitando a exposição de dados sensíveis, como senhas e informações cadastrais privadas.
+
+### 2. Validação de dados com Jakarta Bean Validation
+
+A validação dos dados recebidos pela API é realizada utilizando Jakarta Bean Validation, integrado ao Spring Boot por meio da dependência `spring-boot-starter-validation`.
+
+Foram utilizadas anotações para estabelecer regras diretamente nos DTOs, como:
+
+- `@NotBlank`: impede o envio de campos obrigatórios vazios ou contendo apenas espaços.
+- `@Email`: verifica se o endereço de e-mail possui formato válido.
+- `@Size`: estabelece limites mínimos e máximos para o tamanho dos campos.
+- `@Pattern`: permite definir padrões específicos, como a validação do CPF com 11 dígitos numéricos.
+- `@Past`: garante que a data de nascimento informada seja anterior à data atual.
+
+Nos controllers, a anotação `@Valid` é utilizada junto aos parâmetros recebidos com `@RequestBody`, fazendo com que as validações sejam executadas automaticamente antes da chamada dos serviços.
+
+Além disso, a classe `ApiExceptionHandler`, anotada com `@RestControllerAdvice`, centraliza o tratamento de exceções da API. Dessa forma, erros de validação podem ser convertidos em respostas HTTP 400 (Bad Request), enquanto violações de integridade dos dados podem retornar HTTP 409 (Conflict).
+
+Essa abordagem reduz a necessidade de validações repetidas nos serviços e proporciona respostas mais consistentes para os consumidores da API.
+
+### 3. Lombok e redução de código repetitivo
+
+O projeto possui a dependência do **Project Lombok** configurada no `pom.xml`, incluindo sua configuração como processador de anotações durante a compilação.
+
+O Lombok é uma biblioteca que permite reduzir código repetitivo (*boilerplate*) em classes Java por meio de anotações. Entre os recursos disponíveis estão:
+
+- `@Getter` e `@Setter`: geração automática de métodos de acesso.
+- `@NoArgsConstructor`: geração de construtor sem argumentos.
+- `@AllArgsConstructor`: geração de construtor com todos os atributos.
+- `@Builder`: disponibilização do padrão Builder para criação de objetos.
+
+Entretanto, na versão atual do projeto, embora a dependência e o processamento de anotações estejam configurados, as classes ainda utilizam principalmente construtores e métodos de acesso implementados manualmente. Portanto, o Lombok está preparado para utilização, mas não é um recurso efetivamente aplicado nas classes atuais.
+
+### 4. Injeção de dependência
+
+A aplicação utiliza o mecanismo de Injeção de Dependência (DI) disponibilizado pelo Spring Framework, permitindo que as classes recebam automaticamente os componentes dos quais dependem, sem precisar instanciá-los diretamente.
+
+O projeto utiliza principalmente a **injeção por construtor**, abordagem que facilita a manutenção, os testes e o gerenciamento das dependências.
+
+Por exemplo, a classe `AuthService` recebe por construtor os seguintes componentes:
+
+- `UserRepository`;
+- `TutorRepository`;
+- `VeterinarioRepository`;
+- `PasswordEncoder`;
+- `JwtService`.
+
+Essas dependências são gerenciadas pelo container de inversão de controle do Spring, que identifica os componentes por meio de anotações como `@Service`, `@Repository` e `@Component`.
+
+Com isso, as classes ficam menos acopladas às implementações específicas, facilitando a substituição de componentes e a criação de testes unitários utilizando mocks.
+
+### 5. Arquitetura em camadas
+
+A API foi organizada utilizando uma arquitetura em camadas, separando as responsabilidades de cada parte da aplicação.
+
+A estrutura principal é composta por:
+
+| Camada | Responsabilidade |
+|---|---|
+| `controllers` | Receber requisições HTTP, validar entradas e encaminhar chamadas para os serviços. |
+| `service` | Implementar as regras de negócio, autenticação, gerenciamento de perfis e relatórios. |
+| `repository` | Realizar operações de persistência e consultas ao banco de dados Oracle. |
+| `model` | Representar as entidades persistidas no banco de dados. |
+| `dto/request` | Definir os dados aceitos nas requisições. |
+| `dto/response` | Definir os dados disponibilizados nas respostas. |
+| `config` | Centralizar configurações de segurança, CORS e tratamento de exceções. |
+| `enums` | Representar valores controlados, como status de usuários e veterinários. |
+
+Essa organização permite que cada camada tenha uma responsabilidade bem definida. Por exemplo, o `AuthController` recebe as solicitações de cadastro e login, encaminhando o processamento para `AuthService`, que utiliza os repositórios para consultar e persistir informações.
+
+Dessa maneira, as regras de negócio não ficam concentradas nos controllers, facilitando a manutenção, a reutilização de funcionalidades e a evolução da aplicação.
+
+### 6. Autenticação e autorização com Spring Security e JWT
+
+A segurança da aplicação é implementada utilizando Spring Security, JSON Web Tokens (JWT) e BCrypt para proteção das senhas.
+
+O processo de autenticação funciona da seguinte maneira:
+
+1. O usuário realiza o cadastro informando seus dados pessoais e uma senha.
+2. A aplicação utiliza `BCryptPasswordEncoder` para gerar um hash seguro da senha antes de armazená-la no banco de dados.
+3. No login, a aplicação consulta o usuário pelo e-mail e verifica a senha informada utilizando o mecanismo de comparação do BCrypt.
+4. Após a autenticação bem-sucedida, a classe `JwtService` gera um token JWT contendo informações como e-mail, identificador do usuário e perfil de acesso.
+5. O cliente utiliza esse token nas próximas requisições, enviando-o no cabeçalho HTTP `Authorization: Bearer`.
+6. A classe `JwtAuthenticationFilter`, que estende `OncePerRequestFilter`, intercepta as requisições, verifica a assinatura e a validade do token e estabelece o contexto de autenticação do Spring Security.
+
+O token utiliza o algoritmo HS256 para assinatura e possui informações de emissor (`issuer`) e público destinatário (`audience`), permitindo que a API Java e a API .NET compartilhem o mecanismo de validação de autenticação.
+
+Além da autenticação, o projeto implementa autorização baseada em perfis (*Role-Based Access Control*). São utilizados dois perfis principais:
+
+- **TUTOR:** possui acesso às funcionalidades relacionadas ao próprio perfil e aos relatórios de saúde de seus pets.
+- **VETERINARIO:** possui acesso ao próprio perfil profissional, atualização do CRMV, busca de profissionais e relatórios dos pets compartilhados com ele.
+
+A autorização é aplicada por meio de anotações como `@PreAuthorize`, habilitadas através de `@EnableMethodSecurity` na configuração de segurança.
+
+O filtro JWT também verifica a situação da conta e o perfil do usuário no Oracle, evitando que a autorização dependa exclusivamente das informações presentes no token.
+
+A escolha de JWT permite implementar autenticação sem estado de sessão (*stateless*), facilitando a integração entre diferentes aplicações e a comunicação com o aplicativo mobile e a API .NET do Amandaba.
 
 ### Orientação de deploy
 
@@ -178,4 +281,4 @@ O projeto preserva o `Dockerfile` da versão original (build Maven + execução 
 
 ## Segurança e responsabilidades
 
-O projeto não utiliza OAuth2, Keycloak, serviço externo de autenticação ou outra tecnologia adicional. O JWT usa JJWT/Spring Security já presentes no projeto recebido. A validação JWT do .NET deve ser feita com os recursos ensinados na Aula 08. **Não publique `.env` nem chave JWT, e revogue credenciais expostas no ZIP anterior.**
+O projeto não utiliza OAuth2, Keycloak, serviço externo de autenticação ou outra tecnologia adicional. O JWT usa JWT/Spring Security já presentes no projeto recebido. 
