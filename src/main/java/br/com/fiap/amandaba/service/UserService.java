@@ -64,7 +64,7 @@ public class UserService {
                 user.getCpf(),
                 user.getTelefone(),
                 user.getDataNascimento(),
-                user.getStatusUsuario(),
+                user.getStatusUsuario().name(),
                 idTutor
         );
     }
