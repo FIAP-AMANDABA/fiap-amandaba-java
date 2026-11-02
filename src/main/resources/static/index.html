@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amandaba — Acesso e Perfil</title>
+  <style>
+    :root { font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:#1f2937; background:#f3f7f7; }
+    body { margin:0; } header { background:#123b3d; color:white; padding:20px max(20px,calc((100vw - 1020px)/2)); }
+    main { max-width:980px; margin:30px auto; padding:0 16px 60px; }
+    h1 { margin:0; font-size:1.7rem; } header p { opacity:.85; margin:5px 0 0; }
+    .panel { background:white; border:1px solid #dce6e7; border-radius:14px; padding:23px; margin-bottom:16px; box-shadow:0 2px 10px #123b3d0b; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+    label { display:block; margin:11px 0 5px; font-weight:600; font-size:.9rem; }
+    input,select { width:100%; box-sizing:border-box; border:1px solid #cbd5d7; border-radius:7px; padding:10px; font:inherit; }
+    button { background:#116466; color:white; border:0; border-radius:8px; padding:11px 16px; margin-top:12px; font:inherit; cursor:pointer; }
+    button.secondary { background:#415b62; } button.danger { background:#a22d2d; }
+    .hidden { display:none; } .muted { color:#52616b; font-size:.91rem; } .ok { color:#0b765a; } .error { color:#b42318; }
+    .list { display:grid; gap:9px; } .item { background:#f2f7f6; padding:12px; border-radius:8px; }
+    #message { white-space:pre-wrap; margin:12px 0; }
+  </style>
+</head>
+<body>
+<header><h1>🐾 Amandaba</h1><p>Cadastro, autenticação e gestão de perfil — Java Advanced</p></header>
+<main>
+  <div id="message" role="status"></div>
+  <section id="public" class="grid">
+    <div class="panel"><h2>Entrar</h2>
+      <form id="loginForm"><label>E-mail<input name="email" type="email" required></label>
+        <label>Senha<input name="password" type="password" required></label><button>Entrar</button></form>
+    </div>
+    <div class="panel"><h2>Criar conta</h2><form id="registerForm">
+      <label>Perfil<select id="registerType"><option value="tutor">Tutor</option><option value="vet">Veterinário</option></select></label>
+      <label>Nome completo<input name="nomeCompleto" required></label><label>CPF (11 números)<input name="cpf" pattern="[0-9]{11}" required></label>
+      <label>Nascimento<input name="dataNascimento" type="date"></label><label>E-mail<input name="email" type="email" required></label>
+      <label>Telefone<input name="telefone"></label><label>Senha (mínimo 8 caracteres)<input name="password" type="password" minlength="8" required></label>
+      <label id="crmvLabel" class="hidden">CRMV<input id="crmvInput" name="crmv_veterinario"></label>
+      <button>Cadastrar</button></form></div>
+  </section>
+  <section id="private" class="hidden">
+    <div class="panel"><h2>Meu perfil</h2><p id="identity" class="muted"></p>
+      <form id="profileForm"><div class="grid">
+        <label>Nome completo<input name="nomeCompleto" required></label><label>E-mail<input name="email" type="email" required></label>
+        <label>Telefone<input name="telefone"></label><label>Nascimento<input name="dataNascimento" type="date"></label>
+      </div><button>Salvar alterações</button></form>
+      <button class="secondary" id="logout">Sair</button>
+    </div>
+    <div class="panel hidden" id="vetDetails"><h2>Registro profissional</h2>
+      <form id="crmvForm"><label>CRMV<input name="crmv" required></label>
+      <button>Atualizar CRMV</button></form></div>
+    <div class="panel"><h2>Acompanhamento da saúde</h2>
+      <p class="muted">Resumo gerado a partir de dados reais do Oracle e da função de idade do package PKG_PET_SAUDE.</p>
+      <button id="reportButton">Atualizar relatório</button><div id="reportResults" class="list"></div>
+    </div>
+    <div class="grid">
+      <div class="panel"><h2>Alterar senha</h2><form id="passwordForm">
+        <label>Senha atual<input name="senhaAtual" type="password" required></label>
+        <label>Nova senha<input name="novaSenha" type="password" minlength="8" required></label>
+        <button>Alterar senha</button></form></div>
+      <div class="panel"><h2>Veterinários cadastrados</h2><form id="searchForm">
+        <label>Nome<input name="nome"></label><label>CRMV<input name="crmv"></label><button>Pesquisar</button></form>
+        <div id="results" class="list"></div></div>
+    </div>
+    <div class="panel"><h2>Desativar conta</h2><p class="muted">Desativa o usuário no banco. Este procedimento não exclui os pets.</p>
+      <button class="danger" id="deactivate">Desativar minha conta</button></div>
+  </section>
+</main>
+<script>
+  let token=sessionStorage.getItem('amandabaToken');
+  let currentRole=null;
+  const $=id=>document.getElementById(id);
+  const data=form=>Object.fromEntries(new FormData(form));
+  function msg(text,error=false){$('message').textContent=text;$('message').className=error?'error':'ok';}
+  function setLogged(logged){$('public').classList.toggle('hidden',logged);$('private').classList.toggle('hidden',!logged);}
+  async function api(url,method='GET',body){
+    const res=await fetch(url,{method,headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})},
+       ...(body?{body:JSON.stringify(body)}:{})});
+    let payload=null;try{payload=await res.json();}catch(e){}
+    if(!res.ok)throw new Error(payload?.erro||payload?.detail||('HTTP '+res.status));return payload;
+  }
+  function dateInput(value){return value?String(value).slice(0,10):'';}
+  async function refresh(){const u=await api('/api/usuarios/me');
+    currentRole=u.idTutor?'TUTOR':'VETERINARIO';
+    $('vetDetails').classList.toggle('hidden',currentRole!=='VETERINARIO');
+    $('crmvForm').elements.crmv.value=u.crmv||'';
+    $('identity').textContent=`${u.nomeCompleto} • ${u.idTutor?'Tutor #'+u.idTutor:'Veterinário #'+u.idVeterinario} • Usuário #${u.idUser}`;
+    for(const key of ['nomeCompleto','email','telefone']) $('profileForm').elements[key].value=u[key]||'';
+    $('profileForm').elements.dataNascimento.value=dateInput(u.dataNascimento);setLogged(true);
+  }
+  $('registerType').addEventListener('change',()=>{const vet=$('registerType').value==='vet';
+    $('crmvLabel').classList.toggle('hidden',!vet);$('crmvInput').required=vet;});
+  $('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    const r=await api('/api/auth/login','POST',data(e.target));token=r.token;sessionStorage.setItem('amandabaToken',token);
+    await refresh();msg('Login realizado com sucesso.');
+  }catch(err){msg(err.message,true);}});
+  $('registerForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    const d=data(e.target);if(!d.dataNascimento)delete d.dataNascimento;
+    await api('/api/auth/register/'+$('registerType').value,'POST',d);e.target.reset();msg('Cadastro realizado! Agora faça login.');
+  }catch(err){msg(err.message,true);}});
+  $('profileForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    const d=data(e.target);if(!d.dataNascimento) d.dataNascimento=null;
+    await api('/api/usuarios/me','PUT',d);
+    // O JWT usa o email como subject: após alterá-lo, um novo login é obrigatório.
+    try { await refresh();msg('Perfil atualizado.'); }
+    catch(err) {sessionStorage.removeItem('amandabaToken');token=null;setLogged(false);
+      msg('Perfil atualizado. Faça login novamente para renovar o token.');}
+  }catch(err){msg(err.message,true);}});
+  $('passwordForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    await api('/api/usuarios/me/senha','PUT',data(e.target));e.target.reset();msg('Senha alterada.');
+  }catch(err){msg(err.message,true);}});
+  $('crmvForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    await api('/api/veterinarios/me/crmv','PUT',data(e.target));await refresh();msg('CRMV atualizado.');
+  }catch(err){msg(err.message,true);}});
+  $('reportButton').addEventListener('click',async()=>{try{
+    const route=currentRole==='TUTOR'?'/api/relatorios/tutor/me':'/api/relatorios/veterinario/me';
+    const data=await api(route);$('reportResults').replaceChildren();
+    data.forEach(p=>{const node=document.createElement('div');node.className='item';
+      node.textContent=`${p.nomePet} (${p.especie}) — idade: ${p.idadeAnos??'não informada'} anos, doenças ativas: ${p.doencasAtivas}, medicamentos em uso: ${p.medicamentosEmUso}, vacinas atrasadas: ${p.vacinasAtrasadas}, consultas: ${p.consultasRegistradas}`;
+      $('reportResults').append(node);});
+    msg(data.length?'Relatório atualizado.':'Nenhum pet disponível para o relatório.');
+  }catch(e){msg('Não foi possível consultar o relatório: '+e.message,true);}});
+  $('searchForm').addEventListener('submit',async e=>{e.preventDefault();try{
+    const d=data(e.target);const q=new URLSearchParams();for(const [k,v] of Object.entries(d))if(v.trim())q.set(k,v.trim());
+    const r=await api('/api/veterinarios?'+q.toString());$('results').replaceChildren();
+    (r.content||[]).forEach(v=>{const node=document.createElement('div');node.className='item';
+      node.textContent=`${v.nomeCompleto} — ${v.crmv} (ID: ${v.idVeterinario})`; $('results').append(node);});
+    if(!r.content?.length)msg('Nenhum veterinário encontrado.');else msg('Pesquisa concluída.');
+  }catch(err){msg(err.message,true);}});
+  $('logout').addEventListener('click',()=>{sessionStorage.removeItem('amandabaToken');token=null;setLogged(false);msg('Sessão encerrada.');});
+  $('deactivate').addEventListener('click',async()=>{if(!confirm('Confirma a desativação da conta?'))return;
+    try{await api('/api/usuarios/me','DELETE');sessionStorage.removeItem('amandabaToken');token=null;
+    setLogged(false);msg('Conta desativada.');}catch(err){msg(err.message,true);}});
+  setLogged(false);if(token)refresh().catch(()=>{sessionStorage.removeItem('amandabaToken');token=null;setLogged(false);});
+</script>
+</body>
+</html>

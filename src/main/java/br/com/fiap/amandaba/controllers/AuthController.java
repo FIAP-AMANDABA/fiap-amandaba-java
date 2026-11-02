@@ -1,11 +1,9 @@
 package br.com.fiap.amandaba.controllers;
 
-import br.com.fiap.amandaba.dto.*;
-import br.com.fiap.amandaba.model.Tutor;
-import br.com.fiap.amandaba.model.User;
-import br.com.fiap.amandaba.repository.TutorRepository;
+import br.com.fiap.amandaba.dto.request.*;
+import br.com.fiap.amandaba.dto.response.*;
 import br.com.fiap.amandaba.service.AuthService;
-import org.hibernate.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,53 +11,19 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private final AuthService auth;
+    public AuthController(AuthService auth) { this.auth=auth; }
 
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    @PostMapping("/register/tutor")
+    public ResponseEntity<TutorResponse> registerTutor(@Valid @RequestBody RegisterRequestTutor request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(auth.registerTutor(request));
     }
-
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(
-            @RequestBody RegisterRequest request) {
-
-        System.out.println("REGISTER ENDPOINT HIT");
-        User user = authService.register(request);
-        Tutor tutorCriado = authService.getTutor(user.getId());
-        UserResponse userResponse = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getDataNascimento(),
-                user.getNomeCompleto(),
-                user.getCpf(),
-                user.getTelefone(),
-                user.getDataNascimento(),
-                user.getStatusUsuario(),
-                tutorCriado.getIdTutor()
-        );
-        return ResponseEntity.ok(userResponse);
+    @PostMapping("/register/vet")
+    public ResponseEntity<VetResponse> registerVet(@Valid @RequestBody RegisterRequestVeterinario request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(auth.registerVeterinario(request));
     }
-
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(
-            @RequestBody LoginRequest request) {
-
-        String token = authService.login(request);
-        User user = authService.getUser(request.email());
-        Tutor tutor = authService.getTutor(user.getId());
-        UserResponse userResponse = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getDataNascimento(),
-                user.getNomeCompleto(),
-                user.getCpf(),
-                user.getTelefone(),
-                user.getDataNascimento(),
-                user.getStatusUsuario(),
-                tutor.getIdTutor()
-        );
-        return ResponseEntity.ok(userResponse
-        );
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(auth.login(request));
     }
 }
