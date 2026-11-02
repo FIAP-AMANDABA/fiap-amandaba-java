@@ -275,6 +275,144 @@ O filtro JWT também verifica a situação da conta e o perfil do usuário no Or
 
 A escolha de JWT permite implementar autenticação sem estado de sessão (*stateless*), facilitando a integração entre diferentes aplicações e a comunicação com o aplicativo mobile e a API .NET do Amandaba.
 
+## Decisões arquiteturais e escolhas tecnológicas
+
+Durante o desenvolvimento da API Java do Amandaba, foram realizadas escolhas arquiteturais visando facilitar a manutenção, garantir a segurança das informações dos usuários e permitir a integração com os demais componentes do sistema, especialmente a API .NET e o banco de dados Oracle compartilhado.
+
+As tecnologias foram escolhidas considerando a necessidade de desenvolver uma API REST organizada, segura e preparada para atender tanto o aplicativo mobile quanto outros serviços do ecossistema Amandaba.
+
+### 1. Spring Boot — Desenvolvimento da API
+
+O Spring Boot foi escolhido como framework principal para o desenvolvimento da API devido à sua integração com o ecossistema Spring e à facilidade de configuração de aplicações Java.
+
+Entre os principais motivos para sua utilização estão:
+
+- Configuração simplificada por meio de *auto-configuration*.
+- Integração nativa com Spring Security, Spring Data JPA e Bean Validation.
+- Facilidade para criação de endpoints REST utilizando `@RestController`.
+- Gerenciamento de dependências e componentes por meio do container Spring.
+- Suporte à execução independente da aplicação, sem necessidade de configurar manualmente um servidor de aplicação externo.
+
+A utilização do Spring Boot permitiu concentrar o desenvolvimento nas regras de negócio da aplicação, reduzindo a necessidade de configurações manuais de infraestrutura.
+
+### 2. Spring Security — Segurança e controle de acesso
+
+O Spring Security foi escolhido para centralizar os mecanismos de autenticação e autorização da API.
+
+Como o Amandaba possui diferentes tipos de usuários, tutores e veterinários, era necessário garantir que cada perfil tivesse acesso somente às funcionalidades permitidas.
+
+A tecnologia oferece recursos para:
+
+- Configurar quais endpoints são públicos e quais exigem autenticação.
+- Interceptar requisições HTTP.
+- Validar credenciais e tokens de autenticação.
+- Aplicar regras de autorização de acordo com o perfil do usuário.
+- Integrar filtros personalizados ao fluxo de segurança da aplicação.
+
+No projeto, o Spring Security trabalha em conjunto com um filtro JWT e com anotações como `@PreAuthorize`, permitindo restringir funcionalidades específicas aos tutores ou veterinários.
+
+Essa escolha evita implementar manualmente todo o mecanismo de segurança em cada controller, centralizando as configurações e tornando as regras de acesso mais consistentes.
+
+### 3. JWT (JSON Web Token) — Autenticação sem estado de sessão
+
+Foi escolhido o JWT como mecanismo de autenticação para permitir que o aplicativo mobile e os demais serviços do Amandaba utilizem uma forma padronizada de identificação dos usuários.
+
+Diferentemente de uma autenticação baseada em sessões armazenadas no servidor, o JWT permite que as informações necessárias para identificar o usuário sejam transportadas em um token assinado.
+
+No Amandaba, após um login válido, a API Java gera um token contendo informações como:
+
+- Identificador do usuário.
+- E-mail utilizado na autenticação.
+- Perfil de acesso (TUTOR ou VETERINARIO).
+- Emissor e destinatário do token.
+
+O token é assinado utilizando o algoritmo HS256 e enviado pelo cliente nas próximas requisições por meio do cabeçalho:
+
+`Authorization: Bearer <token>`
+
+Uma decisão importante foi padronizar as informações do JWT para permitir sua validação também pela API .NET. Dessa forma, o usuário pode ser autenticado no serviço Java e utilizar o mesmo mecanismo de identificação ao acessar funcionalidades disponibilizadas pelo serviço .NET.
+
+Essa abordagem reduz a necessidade de implementar mecanismos de login independentes em cada API e facilita a comunicação entre os componentes do sistema.
+
+### 4. BCrypt — Proteção das senhas
+
+Para armazenar as senhas dos usuários, foi escolhido o algoritmo BCrypt, disponibilizado pelo Spring Security por meio da classe `BCryptPasswordEncoder`.
+
+A escolha foi motivada pela necessidade de proteger informações sensíveis e evitar o armazenamento de senhas em texto puro no banco de dados.
+
+O BCrypt utiliza um processo de hashing com salt e custo computacional configurável, tornando mais difícil a descoberta das senhas por ataques de força bruta.
+
+No fluxo de cadastro, a senha recebida é processada pelo `PasswordEncoder` antes de ser persistida no Oracle.
+
+Durante o login, a senha informada é comparada com o hash armazenado utilizando o método `matches`, sem a necessidade de recuperar ou descriptografar a senha original.
+
+Essa decisão aumenta a segurança das contas e segue uma prática recomendada para aplicações que trabalham com autenticação de usuários.
+
+### 5. Spring Data JPA — Persistência e acesso ao banco de dados
+
+O Spring Data JPA foi escolhido para facilitar a comunicação entre a aplicação Java e o banco de dados Oracle.
+
+Por meio dele, é possível representar os dados utilizando entidades Java e realizar operações de persistência através de interfaces Repository, reduzindo a necessidade de implementar manualmente operações SQL para funcionalidades convencionais.
+
+No projeto, essa tecnologia é utilizada para:
+
+- Consultar usuários pelo e-mail e identificadores.
+- Cadastrar tutores e veterinários.
+- Atualizar informações cadastrais.
+- Consultar dados relacionados aos perfis.
+- Gerenciar operações de persistência.
+
+Além das consultas convencionais disponibilizadas pelo JPA, o projeto também utiliza consultas SQL nativas quando é necessário trabalhar diretamente com estruturas específicas do banco Oracle, principalmente nos relatórios de saúde.
+
+A escolha permite combinar produtividade na implementação das operações CRUD com a flexibilidade necessária para consultas mais específicas.
+
+Outro ponto importante é que o Hibernate está configurado com `ddl-auto=none`, evitando que a aplicação altere automaticamente a estrutura do banco compartilhado com a API .NET.
+
+### 6. Separação de responsabilidades — Arquitetura em camadas
+
+A aplicação foi organizada seguindo uma arquitetura em camadas, com o objetivo de separar as responsabilidades e reduzir o acoplamento entre os componentes.
+
+Essa decisão foi importante porque o Amandaba possui diferentes funcionalidades, como autenticação, gerenciamento de perfis, busca de veterinários e consulta de informações de saúde.
+
+A arquitetura adotada distribui essas responsabilidades da seguinte maneira:
+
+- **Controller:** responsável por receber as requisições HTTP, validar os dados de entrada e retornar as respostas.
+- **Service:** responsável por executar as regras de negócio e coordenar as operações da aplicação.
+- **Repository:** responsável pelo acesso e persistência dos dados no Oracle.
+- **Model:** representa as entidades utilizadas no mapeamento dos dados persistidos.
+- **DTO:** controla a comunicação entre a API e seus consumidores, evitando a exposição direta das entidades.
+- **Config:** centraliza configurações de segurança, filtros, CORS e outros componentes da aplicação.
+
+Essa organização permite que alterações em uma camada tenham menor impacto sobre as demais.
+
+Por exemplo, uma mudança na forma de consultar os usuários pode ser realizada na camada Repository sem exigir que toda a lógica de autenticação seja reescrita no Controller.
+
+Além disso, essa separação facilita a realização de testes unitários, pois os serviços podem ser testados isoladamente utilizando mocks para simular os repositórios e outras dependências.
+
+### 7. Oracle compartilhado — Integração entre Java e .NET
+
+Uma decisão arquitetural importante foi manter o banco de dados Oracle compartilhado entre a API Java e a API .NET.
+
+Essa escolha permite que os dois serviços trabalhem sobre uma mesma estrutura de dados, evitando duplicação de informações e a necessidade de sincronizar bancos independentes.
+
+A API Java é responsável principalmente pelo cadastro, autenticação e gerenciamento dos perfis de tutores e veterinários. Já a API .NET concentra as funcionalidades relacionadas ao gerenciamento dos pets e suas informações de saúde.
+
+Ambas utilizam as estruturas definidas na disciplina de Banco de Dados, mantendo uma fonte centralizada de informações.
+
+Para evitar conflitos entre os serviços, a aplicação Java não realiza a criação automática das tabelas pelo Hibernate e mantém o Flyway desabilitado por padrão no ambiente compartilhado.
+
+Além disso, foram utilizadas consultas SQL nativas em funcionalidades que dependem de estruturas específicas do Oracle, como os relatórios de saúde e a função PL/SQL responsável pelo cálculo da idade dos pets.
+
+Essa decisão demonstra a aplicação de uma arquitetura baseada em serviços independentes que compartilham uma mesma camada de persistência, respeitando as responsabilidades de cada API.
+
+### Considerações finais
+
+As decisões arquiteturais adotadas buscam equilibrar segurança, organização, manutenção e integração entre tecnologias.
+
+A combinação de Spring Boot, Spring Security, JWT, BCrypt e Spring Data JPA permite desenvolver uma API REST estruturada e segura, enquanto a arquitetura em camadas facilita a evolução do código.
+
+A integração com o Oracle compartilhado e com a API .NET permite que o Amandaba funcione como um ecossistema composto por diferentes serviços, cada um responsável por um conjunto específico de funcionalidades.
+
 ### Orientação de deploy
 
 O projeto preserva o `Dockerfile` da versão original (build Maven + execução com Java 21). No host de nuvem, configure todas as variáveis na interface de gerenciamento de segredos, habilite conectividade com o Oracle, publique a porta `8080` e teste os endpoints públicos e privados. Nenhum deploy foi efetuado automaticamente.
